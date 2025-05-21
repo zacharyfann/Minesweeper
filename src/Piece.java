@@ -20,9 +20,8 @@ public abstract class Piece {
 	
 	protected Tile[][] board;			//Piece has a reference to the board
 
-	public Piece(String fileName, COLOR color, int row, int col, Tile[][] board) {
+	public Piece(String fileName, int row, int col, Tile[][] board) {
 
- 		this.color = color;
 		this.row = row;
 		this.col = col;
 		setIcon(fileName);

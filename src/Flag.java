@@ -1,9 +1,9 @@
 
 public class Flag extends Piece{
 	
-	public Flag(String fileName, COLOR color, int row, int col, Tile[][] board) 
+	public Flag(String fileName, int row, int col, Tile[][] board) 
 	{
-		super(fileName.contains("b_") ? "b_knight.png" : "w_knight.png", color, row, col, board);	
+		super("\\\\dohome2.pusd.dom\\home2$\\Student2\\1909278\\GitHub\\Minesweeper\\imgs\\Flag.png", row, col, board);	
 	}
 	
 

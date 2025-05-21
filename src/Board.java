@@ -26,7 +26,7 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	
 	private boolean firstClick = false;
 	private Tile firstClickPiece = null;
-	private ChessLogic chessLogic = new ChessLogic();
+	private MinesweeperLogic mineLogic = new MinesweeperLogic();
 	
 	JFrame frame;
 	
