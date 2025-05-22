@@ -43,9 +43,8 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	 * 
 	 */
 	public Board() {
-		frame = new JFrame("Chess");
+		frame = new JFrame("Minesweeper");
 		setup();
-		
 	}
 
 	public void setup() {
