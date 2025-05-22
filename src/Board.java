@@ -25,15 +25,22 @@ import javax.swing.KeyStroke;
 public class Board extends JPanel implements MouseListener, ActionListener{
 	
 	private MinesweeperLogic mineLogic = new MinesweeperLogic();
-	
-	JFrame frame;
+	private Tile[][] board;
+	private JFrame frame;
+	private Timer timer;
+	private int timeElapsed = 0;
+	private boolean gameStarted = false;
+	private boolean gameOver = false;
 	
 	//size of the frame
+	private int boardSize = 10;
+	private int mineCount = 15;
 	private int width 	= 800;
 	private int height 	= 800;
 
 	public Board() {
 		frame = new JFrame("Minesweeper");
+		mineLogic = new MinesweeperLogic(boardSize, mineCount);
 		setup();
 	}
 
