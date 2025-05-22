@@ -10,3 +10,4 @@ public class main {
 
 
 }
+// The board will be a 2D array of buttonswith alternating colors

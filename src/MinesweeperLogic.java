@@ -2,91 +2,120 @@
 public class MinesweeperLogic {
 	
 	
-	private Tile[][] board;	
-	private boolean[][] mines = new boolean[18][14]; 
-	/*
-	 * The constructor setups up the 2D array of Tiles for the chess board
-	 * The constructor calls 3 helper methods with add chess pieces on the board
-	 * A tile in the board either have a piece or not have a piece
-	 */
-	public MinesweeperLogic() {
-		board = new Tile[18][14];
-		
-		for(int i = 0; i < board.length;i++) {
-			for(int j = 0; j < board[0].length;j++) {
+	private Tile[][] board;
+	private boolean[][] mines;
+	private int boardSize;
+	private int mineCount;
+	private int revealedFlags;
+	private int revealedTiles;
+	private int flagCount;
+	private Random random;
+
+
+	public MinesweeperLogic(int size, int mineCount) {
+		this.boardsize = size;
+		this.mineCount = mineCount;
+		this.revealedFlags = 0;
+		this.flagCount = 0;
+		this.random = new Random();
+
+		initializeBoard();
+	}
+
+	private void initializeBoard() {
+		board = new Tile[boardSize][boardSize];
+		mines = new boolean[boardSize][boardSize];
+
+		for (int i = 0; i < boardSize; i++) {
+			for (int j = 0; j < boardSize; j++) {
 				board[i][j] = new Tile(i, j);
 			}
-		}	
-		placeMines(40);
-		
+		}
+
+		placeMines();
 	}
 	
-	public void placeMines(int numMines) {
+	private void placeMines() {
+		int placedMines = 0;
+
+		while (placedMines < mineCount) {
+			int x = random.nextInt(boardSize);
+			int y = random.nextInt(boardSize);
+
+			if (!mines[x][y]) {
+				mines[x][y] = true;
+				placedMines++;
+			}
+		}
+	}
+	
+	public boolean revealTime(int row, int col){
+		if (!isValidPosition(row, col) || board[row][col].isRevealed()) {
+			return false;
+		}
+
+		board[row][col].setRevealed(true);
+		revealedTiles++;
+
+		return mines[row][col];
+	}
+
+	public int getAdjacentMineCount(int row, int col) {
+		if (!isValidPosition(row, col)) {
+			return 0;
+		}
+
 		int count = 0;
-		while(count < numMines) {
-			int row = (int)(Math.random() * 18)+1;
-			int col = (int)(Math.random() * 14)+1;
-			if(mines[row][col] == false) {
-				mines[row][col] = true;
-				count++;
+
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (i == 0 && j == 0) continue;
+				int newRow = row + i;
+				int newCol = col + j;
+
+				if (isValidPosition(newRow, newCol) && mines[newRow][newCol]) {
+					count++;
+				}
 			}
 		}
-		
-		
+
+		return count;
 	}
-	
-	public void setNumbers() {
-		for (int i = 0; i < board.length;i++) {
-			for (int j = 0; j < board[i].length;j++) {
-				if (board[i][j].getPiece() == null) {
-					int numMines = 0;
-					for (int x = -1; x <=1; x++) {  //this checks the x direction one tile to the left and one tile to the right
-						for(int y = -1; y<=1; y++) { //this checks the y direction one tile up and one tile down
-							if (i+x >= 0 && i+x < board.length && j+y >= 0 && j+y < board[i].length) { //this checks if the tile is within the bounds of the board (no out of bounds error)
-								if (mines[i+x][j+y] == true) { //this checks if the tile is a mine
-									numMines++;
-								}
-								board[i][j].setPiece(new Number( numMines, i, j, board)); //set the tile to the number of mines around it
-								board[i][j].getPiece().setLocation(i, j);
-							}
 
-
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
+	public boolean isValidPosition(int row, int col) {
+		return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
 	}
-	public Boolean isGameWon() {
-		
-		for(int i = 0; i < board.length;i++) {
-			for(int j = 0; j < board[i].length;j++) {
-				if (mines[i][j] == true && board[i][j].isFlagged() == false) {
-					return false;
-				}
-				else if (board[i][j] == false && board[i][j].isFlagged() == true) {
-					return false;
-				}
 
-			}
-			
-		}
-
-		return true;
+	public boolean isMine(int row, int col) {
+		return isValidPosition(row, col) && mines[row][col];
 	}
-	
-	/*
-	 * Getter for board
-	 */
+
 	public Tile[][] getBoard() {
-		return this.board;
+		return board;
+	}
+
+	public int getBoardSize() {
+		return boardSize;
+	}
+
+	public int getMineCount() {
+		return mineCount;
+	}
+
+	public int getFlagCount() {
+		flagCount = 0;
+
+		for (int i = 0; i < boardSize; i++) {
+			for (int j = 0; j < boardSize; j++) {
+				if (board[i][j].isFlagged()) {
+					flagCount++;
+				}
+			}
+		}
+		return flagCount;
+	}
+
+	public int getRevealedTiles() {
+		return revealedTiles;
 	}	
-	
-	
-	
 }
