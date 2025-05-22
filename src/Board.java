@@ -24,8 +24,6 @@ import javax.swing.KeyStroke;
 
 public class Board extends JPanel implements MouseListener, ActionListener{
 	
-	private boolean firstClick = false;
-	private Tile firstClickPiece = null;
 	private MinesweeperLogic mineLogic = new MinesweeperLogic();
 	
 	JFrame frame;
@@ -34,14 +32,6 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	private int width 	= 800;
 	private int height 	= 800;
 
-	/* Initialize the 8x8 board with pieces
-	 * The top 2 rows should have the black pieces
-	 * The bottom 2 rows should have the white pieces
-	 * 
-	 * Please see https://en.wikipedia.org/wiki/Chess
-	 * for the starting board positions and the rules of the game
-	 * 
-	 */
 	public Board() {
 		frame = new JFrame("Minesweeper");
 		setup();
@@ -68,12 +58,12 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	public void setupBoard() {
 		JPanel jp = new JPanel();
 
-		GridLayout g = new GridLayout(8,8);
+		GridLayout g = new GridLayout(18,14);
 		jp.setLayout(g);	
 
 
-		Tile[][] board = chessLogic.getBoard();
-		for(int i =0; i < board.length;i++) {
+		Tile[][] board = mineLogic.getBoard();
+		for(int i = 0; i < board.length;i++) {
 			for(int j = 0; j < board[0].length;j++) {
 				jp.add(board[i][j]);
 				board[i][j].addMouseListener(this);
