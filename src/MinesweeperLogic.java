@@ -3,59 +3,119 @@ public class MinesweeperLogic {
 	
 	
 	private Tile[][] board;
-	boolean playerTurn = true; //true = white, false = black
-	
-	/*
-	 * The constructor setups up the 2D array of Tiles for the chess board
-	 * The constructor calls 3 helper methods with add chess pieces on the board
-	 * A tile in the board either have a piece or not have a piece
-	 */
-	public MinesweeperLogic() {
-		board = new Tile[18][14];
-		
-		for(int i =0; i < board.length;i++) {
-			for(int j = 0; j < board[0].length;j++) {
+	private boolean[][] mines;
+	private int boardSize;
+	private int mineCount;
+	private int revealedFlags;
+	private int revealedTiles;
+	private int flagCount;
+	private Random random;
+
+
+	public MinesweeperLogic(int size, int mineCount) {
+		this.boardsize = size;
+		this.mineCount = mineCount;
+		this.revealedFlags = 0;
+		this.flagCount = 0;
+		this.random = new Random();
+
+		initializeBoard();
+	}
+
+	private void initializeBoard() {
+		board = new Tile[boardSize][boardSize];
+		mines = new boolean[boardSize][boardSize];
+
+		for (int i = 0; i < boardSize; i++) {
+			for (int j = 0; j < boardSize; j++) {
 				board[i][j] = new Tile(i, j);
 			}
-		}	
-		
-		
-		//setup other pieces
-		setupPieces(COLOR.BLACK);
-		setupPieces(COLOR.WHITE);
+		}
+
+		placeMines();
 	}
 	
-	public void setupPieces(COLOR color) {
-		
-		String prefix = color == COLOR.BLACK ? "b_" : "w_";
-		
-		
-		//Queen & King
-		board[color == COLOR.BLACK? 0 : board.length-1][3].setPiece(new Queen(prefix+"_queen.png", color,board.length-2,3, board ));
-		board[color == COLOR.BLACK? 0 : board.length-1][4].setPiece(new King(prefix+"_king.png", color,board.length-2,3, board ));
+	private void placeMines() {
+		int placedMines = 0;
 
-		//Bishops
-		board[color == COLOR.BLACK? 0 : board.length-1][2].setPiece(new Bishop(prefix+"_bishop.png", color,board.length-2,3, board));
-		board[color == COLOR.BLACK? 0 : board.length-1][5].setPiece(new Bishop(prefix+"_bishop.png", color,board.length-2,3, board ));
+		while (placedMines < mineCount) {
+			int x = random.nextInt(boardSize);
+			int y = random.nextInt(boardSize);
 
-		//Knights
-		board[color == COLOR.BLACK? 0 : board.length-1][1].setPiece(new Knight(prefix+"_knight.png", color,board.length-2,3, board ));
-		board[color == COLOR.BLACK? 0 : board.length-1][6].setPiece(new Knight(prefix+"_knight.png", color,board.length-2,3, board ));
-
-		//Rooks
-		board[color == COLOR.BLACK? 0 : board.length-1][0].setPiece(new Rook(prefix+"_rook.png", color,board.length-2,3, board ));
-		board[color == COLOR.BLACK? 0 : board.length-1][7].setPiece(new Rook(prefix+"_rook.png", color,board.length-2,3, board ));
-
+			if (!mines[x][y]) {
+				mines[x][y] = true;
+				placedMines++;
+			}
+		}
 	}
 	
-	
-	/*
-	 * Getter for board
-	 */
+	public boolean revealTime(int row, int col){
+		if (!isValidPosition(row, col) || board[row][col].isRevealed()) {
+			return false;
+		}
+
+		board[row][col].setRevealed(true);
+		revealedTiles++;
+
+		return mines[row][col];
+	}
+
+	public int getAdjacentMineCount(int row, int col) {
+		if (!isValidPosition(row, col)) {
+			return 0;
+		}
+
+		int count = 0;
+
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (i == 0 && j == 0) continue;
+				int newRow = row + i;
+				int newCol = col + j;
+
+				if (isValidPosition(newRow, newCol) && mines[newRow][newCol]) {
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	public boolean isValidPosition(int row, int col) {
+		return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
+	}
+
+	public boolean isMine(int row, int col) {
+		return isValidPosition(row, col) && mines[row][col];
+	}
+
 	public Tile[][] getBoard() {
-		return this.board;
+		return board;
+	}
+
+	public int getBoardSize() {
+		return boardSize;
+	}
+
+	public int getMineCount() {
+		return mineCount;
+	}
+
+	public int getFlagCount() {
+		flagCount = 0;
+
+		for (int i = 0; i < boardSize; i++) {
+			for (int j = 0; j < boardSize; j++) {
+				if (board[i][j].isFlagged()) {
+					flagCount++;
+				}
+			}
+		}
+		return flagCount;
+	}
+
+	public int getRevealedTiles() {
+		return revealedTiles;
 	}	
-	
-	
-	
 }
