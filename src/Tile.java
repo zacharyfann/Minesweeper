@@ -52,5 +52,11 @@ public class Tile extends JButton{
 	public Piece getPiece() {
 		return piece;
 	}
+	public boolean isFlagged() {
+		if(piece instanceof Flag) {
+			return true;
+		}
+		return false;
+	}
 	
 }

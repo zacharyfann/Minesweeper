@@ -2,9 +2,7 @@
 public class MinesweeperLogic {
 	
 	
-	private Tile[][] board;
-	boolean playerTurn = true; //true = white, false = black
-	
+	private Tile[][] board;	
 	/*
 	 * The constructor setups up the 2D array of Tiles for the chess board
 	 * The constructor calls 3 helper methods with add chess pieces on the board
@@ -13,41 +11,73 @@ public class MinesweeperLogic {
 	public MinesweeperLogic() {
 		board = new Tile[18][14];
 		
-		for(int i =0; i < board.length;i++) {
+		for(int i = 0; i < board.length;i++) {
 			for(int j = 0; j < board[0].length;j++) {
 				board[i][j] = new Tile(i, j);
 			}
 		}	
+		placeMines(40);
 		
-		
-		//setup other pieces
-		setupPieces(COLOR.BLACK);
-		setupPieces(COLOR.WHITE);
 	}
 	
-	public void setupPieces(COLOR color) {
+	public void placeMines(int numMines) {
+		int count = 0;
+		while(count < numMines) {
+			int row = (int)(Math.random() * 18)+1;
+			int col = (int)(Math.random() * 14)+1;
+			if(board[row][col].getPiece() == null) {
+				board[row][col].setPiece(new Mine(row, col, board));
+				count++;
+			}
+		}
 		
-		String prefix = color == COLOR.BLACK ? "b_" : "w_";
 		
-		
-		//Queen & King
-		board[color == COLOR.BLACK? 0 : board.length-1][3].setPiece(new Queen(prefix+"_queen.png", color,board.length-2,3, board ));
-		board[color == COLOR.BLACK? 0 : board.length-1][4].setPiece(new King(prefix+"_king.png", color,board.length-2,3, board ));
-
-		//Bishops
-		board[color == COLOR.BLACK? 0 : board.length-1][2].setPiece(new Bishop(prefix+"_bishop.png", color,board.length-2,3, board));
-		board[color == COLOR.BLACK? 0 : board.length-1][5].setPiece(new Bishop(prefix+"_bishop.png", color,board.length-2,3, board ));
-
-		//Knights
-		board[color == COLOR.BLACK? 0 : board.length-1][1].setPiece(new Knight(prefix+"_knight.png", color,board.length-2,3, board ));
-		board[color == COLOR.BLACK? 0 : board.length-1][6].setPiece(new Knight(prefix+"_knight.png", color,board.length-2,3, board ));
-
-		//Rooks
-		board[color == COLOR.BLACK? 0 : board.length-1][0].setPiece(new Rook(prefix+"_rook.png", color,board.length-2,3, board ));
-		board[color == COLOR.BLACK? 0 : board.length-1][7].setPiece(new Rook(prefix+"_rook.png", color,board.length-2,3, board ));
-
 	}
 	
+	public void setNumbers() {
+		for (int i = 0; i < board.length;i++) {
+			for (int j = 0; j < board[i].length;j++) {
+				if (board[i][j].getPiece() == null) {
+					int numMines = 0;
+					for (int x = -1; x <=1; x++) {  //this checks the x direction one tile to the left and one tile to the right
+						for(int y = -1; y<=1; y++) { //this checks the y direction one tile up and one tile down
+							if (i+x >= 0 && i+x < board.length && j+y >= 0 && j+y < board[i].length) { //this checks if the tile is within the bounds of the board (no out of bounds error)
+								if (board[i+x][j+y].getPiece() instanceof Mine) {
+									numMines++;
+								}
+								board[i][j].setPiece(new Number( numMines, i, j, board)); //set the tile to the number of mines around it
+								board[i][j].getPiece().setLocation(i, j);
+							}
+
+
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+	public Boolean isGameWon() {
+		
+		for(int i = 0; i < board.length;i++) {
+			for(int j = 0; j < board[i].length;j++) {
+				if (board[i][j].getPiece() instanceof Mine && board[i][j].isFlagged() == false) {
+					return false;
+				}
+				else if (board[i][j].getPiece() instanceof Number && board[i][j].isFlagged() == true) {
+					return false;
+				}
+
+			}
+			
+		}
+
+		return true;
+	}
 	
 	/*
 	 * Getter for board
