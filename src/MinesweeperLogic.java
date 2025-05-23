@@ -38,7 +38,7 @@ public class MinesweeperLogic {
 
 	public void ensureSafety(int row, int col) {
 		if (mines[row][col] || getAdjacentMineCount(row, col) > 0) {
-			
+			initializeBoard();
 		}
 	}
 	

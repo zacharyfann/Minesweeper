@@ -109,7 +109,7 @@ public class Board extends JPanel implements MouseListener{
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
 			if (!clickedTile.isFlagged()) {
-				revealTime(row, col);
+				mineLogic.revealTime(row, col);
 			}
 		} else if(e.getButton() == MouseEvent.BUTTON3) {
 			if(!clickedTile.isRevealed()){
@@ -117,7 +117,7 @@ public class Board extends JPanel implements MouseListener{
 			}
 		}
 
-		updateTile();
+		updateTileDisplay(row, col);
 		checkWinCondition();
 	}
 
