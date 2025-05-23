@@ -1,3 +1,4 @@
+import java.util.Random;;
 
 public class MinesweeperLogic {
 	
@@ -13,7 +14,7 @@ public class MinesweeperLogic {
 
 
 	public MinesweeperLogic(int size, int mineCount) {
-		this.boardsize = size;
+		this.boardSize = size;
 		this.mineCount = mineCount;
 		this.revealedFlags = 0;
 		this.flagCount = 0;
@@ -33,6 +34,12 @@ public class MinesweeperLogic {
 		}
 
 		placeMines();
+	}
+
+	public void ensureSafety(int row, int col) {
+		if (mines[row][col] || getAdjacentMineCount(row, col) > 0) {
+			
+		}
 	}
 	
 	private void placeMines() {

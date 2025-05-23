@@ -21,13 +21,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.Timer;
+import javax.swing.SwingConstants;
 
-public class Board extends JPanel implements MouseListener, ActionListener{
+public class Board extends JPanel implements MouseListener{
 	
-	private MinesweeperLogic mineLogic = new MinesweeperLogic();
+	private MinesweeperLogic mineLogic;
 	private Tile[][] board;
 	private JFrame frame;
-	private Timer timer;
+	private Timer gameTimer;
 	private int timeElapsed = 0;
 	private boolean gameStarted = false;
 	private boolean gameOver = false;
@@ -70,17 +72,19 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	public void setupBoard() {
 		frame.getContentPane().removeAll();
 
-		JPanel gamPanel = new JPanel();
+		JPanel gamePanel = new JPanel();
 		GridLayout gridLayout = new GridLayout(boardSize, boardSize);	
-		gamPanel.setLayout(gridLayout);
-		gamPanel.setBackground(Color.GRAY);
+		gamePanel.setLayout(gridLayout);
+		gamePanel.setBackground(Color.GRAY);
 
-		for (int i = 0; i < board.length; i++){
-			for (int j = 0; j < board[i].length; j++){
+		board = mineLogic.getBoard();
+
+		for (int i = 0; i < boardSize; i++){
+			for (int j = 0; j < boardSize; j++){
 				board[i][j].addMouseListener(this);
-				board[i][j].setFont(new Font("Arial", Font.PLAIN, 20));
+				board[i][j].setFont(getFont().deriveFont(12.0f));
 				board[i][j].setHorizontalAlignment(SwingConstants.CENTER);
-				gamPanel.add(board[i][j]);
+				gamePanel.add(board[i][j]);
 			}
 		}
 		
@@ -302,4 +306,32 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 		frame.setJMenuBar(menuBar);
 	}
 
+	@Override
+    public void mousePressed(MouseEvent e) {
+	
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+       
+    }
+
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // TODO Auto-generated method stub
+        repaint();
+    }
 }
