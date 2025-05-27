@@ -113,7 +113,7 @@ public class Board extends JPanel implements MouseListener{
 			if (!clickedTile.isFlagged()) {
 				revealTile(row, col);
 			}
-		} else if(e.getButton() == MouseEvent.BUTTON3) {
+		} else if(e.getButton() == MouseEvent.BUTTON3 && gameStarted) {
 			// System.out.println("Right clicked" + row + ", " + col);
 			if(!clickedTile.isRevealed()){
 				toggleFlag(clickedTile);
@@ -152,7 +152,7 @@ public class Board extends JPanel implements MouseListener{
 	}
 
 	private void toggleFlag(Tile tile) {
-		System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
+		// System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
 		if(!tile.isFlagged()){
 			tile.setText("🚩");
 			tile.setBackground(Color.YELLOW);
