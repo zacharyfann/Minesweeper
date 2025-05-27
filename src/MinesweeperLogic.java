@@ -5,15 +5,17 @@ public class MinesweeperLogic {
 	
 	private Tile[][] board;
 	private boolean[][] mines;
-	private int boardSize;
-	private int mineCount;
+	private int rows;
+	private int cols;
 	private int revealedFlags;
 	private int revealedTiles;
 	private int flagCount;
 	private Random random;
+	private int mineCount;
 	
-	public MinesweeperLogic(int size, int mineCount) {
-		this.boardSize = size;
+	public MinesweeperLogic(int rows, int cols, int mineCount) {
+		this.rows = rows;
+		this.cols = cols;
 		this.mineCount = mineCount;
 		this.revealedFlags = 0;
 		this.flagCount = 0;
@@ -23,11 +25,11 @@ public class MinesweeperLogic {
 	}
 
 	private void initializeBoard() {
-		board = new Tile[boardSize][boardSize];
-		mines = new boolean[boardSize][boardSize];
+		board = new Tile[rows][cols];
+		mines = new boolean[rows][cols];
 
-		for (int i = 0; i < boardSize; i++) {
-			for (int j = 0; j < boardSize; j++) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
 				board[i][j] = new Tile(i, j);
 			}
 		}
@@ -44,9 +46,9 @@ public class MinesweeperLogic {
 	private void placeMines() {
 		int placedMines = 0;
 
-		while (placedMines < mineCount) {
-			int x = random.nextInt(boardSize);
-			int y = random.nextInt(boardSize);
+		while (placedMines < this.mineCount) {
+			int x = random.nextInt(rows);
+			int y = random.nextInt(cols);
 
 			if (!mines[x][y]) {
 				mines[x][y] = true;
@@ -89,7 +91,7 @@ public class MinesweeperLogic {
 	}
 
 	public boolean isValidPosition(int row, int col) {
-		return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
+		return row >= 0 && row < rows && col >= 0 && col < cols;
 	}
 
 	public boolean isMine(int row, int col) {
@@ -100,19 +102,19 @@ public class MinesweeperLogic {
 		return board;
 	}
 
-	public int getBoardSize() {
-		return boardSize;
-	}
+	// public int getBoardSize() {
+	// 	return boardSize;
+	// }
 
 	public int getMineCount() {
-		return mineCount;
+		return this.mineCount;
 	}
 
 	public int getFlagCount() {
 		flagCount = 0;
 
-		for (int i = 0; i < boardSize; i++) {
-			for (int j = 0; j < boardSize; j++) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
 				if (board[i][j].isFlagged()) {
 					flagCount++;
 				}
@@ -126,13 +128,13 @@ public class MinesweeperLogic {
 	}	
 
 	public boolean isGameWon() {
-        int totalTiles = boardSize * boardSize;
-        int expectedRevealed = totalTiles - mineCount;
+        int totalTiles = rows * cols;
+        int expectedRevealed = totalTiles - this.mineCount;
         return revealedTiles == expectedRevealed;
     }
 	public void testMineLocations(){
-		for(int i = 0; i < boardSize; i++){
-			for(int j = 0; j < boardSize; j++){
+		for(int i = 0; i < rows; i++){
+			for(int j = 0; j < cols; j++){
 				if(isMine(i, j)) System.out.print("B ");
 				else System.out.print(". ");
 			}

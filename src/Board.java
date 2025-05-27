@@ -35,10 +35,11 @@ public class Board extends JPanel implements MouseListener{
 	private boolean gameOver = false;
 	
 	//size of the frame
-	private int boardSize = 18;
+	private int rows = 14;
+	private int cols = 18;
 	private int mineCount = 40;
-	private int width 	= 800;
-	private int height 	= 800;
+	private int width 	= cols*50;
+	private int height 	= rows*50 + 50; //menu bar
 
 	private Color[] startColors = {
 		new Color(11196241), new Color(10670409)
@@ -49,7 +50,7 @@ public class Board extends JPanel implements MouseListener{
 
 	public Board() {
 		frame = new JFrame("Minesweeper");
-		mineLogic = new MinesweeperLogic(boardSize, mineCount);
+		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
 		setup();
 	}
 
@@ -80,14 +81,14 @@ public class Board extends JPanel implements MouseListener{
 		frame.getContentPane().removeAll();
 
 		JPanel gamePanel = new JPanel();
-		GridLayout gridLayout = new GridLayout(boardSize, boardSize);	
+		GridLayout gridLayout = new GridLayout(rows, cols);	
 		gamePanel.setLayout(gridLayout);
 		gamePanel.setBackground(Color.GRAY);
 
 		board = mineLogic.getBoard();
 
-		for (int i = 0; i < boardSize; i++){
-			for (int j = 0; j < boardSize; j++){
+		for (int i = 0; i < rows; i++){
+			for (int j = 0; j < cols; j++){
 				board[i][j].addMouseListener(this);
 				board[i][j].setFont(getFont().deriveFont(12.0f));
 				board[i][j].setHorizontalAlignment(SwingConstants.CENTER);
@@ -233,7 +234,7 @@ public class Board extends JPanel implements MouseListener{
 		timeElapsed = 0;
 		gameTimer.stop();
 
-		mineLogic = new MinesweeperLogic(boardSize, mineCount);
+		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
 		setupBoard();
 		updateTitle();
 	}
