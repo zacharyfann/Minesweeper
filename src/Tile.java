@@ -9,7 +9,7 @@ public class Tile extends JButton{
 	private boolean revealed;
 	private boolean flagged;
 	
-	public Tile(int row, int ccol) {
+	public Tile(int row, int col) {
 	    this.row = row;
 		this.col = col;
 		this.revealed = false;

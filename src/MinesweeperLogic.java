@@ -11,8 +11,7 @@ public class MinesweeperLogic {
 	private int revealedTiles;
 	private int flagCount;
 	private Random random;
-
-
+	
 	public MinesweeperLogic(int size, int mineCount) {
 		this.boardSize = size;
 		this.mineCount = mineCount;
@@ -56,15 +55,15 @@ public class MinesweeperLogic {
 		}
 	}
 	
-	public boolean revealTime(int row, int col){
+	public boolean revealTile(int row, int col){
 		if (!isValidPosition(row, col) || board[row][col].isRevealed()) {
 			return false;
 		}
 
 		board[row][col].setRevealed(true);
 		revealedTiles++;
-
-		return mines[row][col];
+		System.out.println(isMine(row, col));
+		return isMine(row, col);
 	}
 
 	public int getAdjacentMineCount(int row, int col) {
@@ -125,4 +124,20 @@ public class MinesweeperLogic {
 	public int getRevealedTiles() {
 		return revealedTiles;
 	}	
+
+	public boolean isGameWon() {
+        int totalTiles = boardSize * boardSize;
+        int expectedRevealed = totalTiles - mineCount;
+        return revealedTiles == expectedRevealed;
+    }
+	public void testMineLocations(){
+		for(int i = 0; i < boardSize; i++){
+			for(int j = 0; j < boardSize; j++){
+				if(isMine(i, j)) System.out.print("B ");
+				else System.out.print(". ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
 }

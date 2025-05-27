@@ -96,6 +96,8 @@ public class Board extends JPanel implements MouseListener{
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (gameOver) return;
+		// showAllMines(); //for testing
+		mineLogic.testMineLocations();
  		
 		Tile clickedTile = (Tile) e.getComponent();
 		int row = clickedTile.getRow();
@@ -109,7 +111,7 @@ public class Board extends JPanel implements MouseListener{
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
 			if (!clickedTile.isFlagged()) {
-				mineLogic.revealTime(row, col);
+				revealTile(row, col); //could be reveal time idk
 			}
 		} else if(e.getButton() == MouseEvent.BUTTON3) {
 			if(!clickedTile.isRevealed()){
@@ -122,6 +124,7 @@ public class Board extends JPanel implements MouseListener{
 	}
 
 	private void revealTile(int row, int col) {
+		System.out.println("asdfasdf");
 		if(mineLogic.revealTile(row, col)){
 			gameOver = true;
 			gameTimer.stop();
@@ -136,13 +139,13 @@ public class Board extends JPanel implements MouseListener{
 		}
 	}
 
-	private revealAdjacentTiles(int row, int col) {
+	private void revealAdjacentTiles(int row, int col) {
 		for(int i = -1; i <= 1; i++){
 			for(int j = -1; j <= 1; j++){
 				if(i == 0 && j == 0) continue;
 				int newRow = row + i;
 				int newCol = col + j;
-				if(mineLogic.isValidTile(newRow, newCol) && !board[newRow][newCol].isRevealed() && !board[newRow][newCol].isFlagged()){
+				if(mineLogic.isValidPosition(newRow, newCol) && !board[newRow][newCol].isRevealed() && !board[newRow][newCol].isFlagged()){
 					revealTile(newRow, newCol);
 				}
 			}
@@ -169,7 +172,7 @@ public class Board extends JPanel implements MouseListener{
 			tile.setForeground(getColorForNumber(adjacentMines));
 		}
 		tile.setBackground(Color.WHITE);
-		tile.setBorder(BorderFactory.createLineBorder());
+		tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 	private Color getColorForNumber(int number) {
 		switch(number){
@@ -196,7 +199,7 @@ public class Board extends JPanel implements MouseListener{
 	}
 
 	private void checkWinCondition() {
-		if(!ggameover && mineLogic.isGameWon()){
+		if(!gameOver && mineLogic.isGameWon()){
 			gameOver = true;
 			gameTimer.stop();
 
@@ -326,12 +329,5 @@ public class Board extends JPanel implements MouseListener{
     public void mouseExited(MouseEvent e) {
         // TODO Auto-generated method stub
        
-    }
-
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // TODO Auto-generated method stub
-        repaint();
     }
 }
