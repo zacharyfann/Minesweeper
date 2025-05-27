@@ -1,32 +1,36 @@
 import java.awt.Color;
-
+import java.awt.Dimension;
 import javax.swing.JButton;
+import javax.swing.BorderFactory;
 
 public class Tile extends JButton{
-	private Piece piece;
-	public static int num = 0;
-	private int row, col;
-	
-	public void setRow(int row) {
-		this.row = row;
-	}
+	private int row;
+	private int col;
+	private boolean revealed;
+	private boolean flagged;
 
-	public void setCol(int col) {
+	private Color[] startColors = {
+		new Color(11196241), new Color(7574834)
+	};
+	private Color[] endColors = {
+		new Color(15057567), new Color(14137497)
+	};
+	
+	public Tile(int row, int col) {
+	    this.row = row;
 		this.col = col;
+		this.revealed = false;
+		this.flagged = false;
+
+		setupTile();
 	}
 
-	//color for white and black is a differed hue
-	private Color black =  Color.decode("#62cbe7");  //change to darker green
-	private Color white = Color.decode("#104373");  //change to lighter green
-	
-	public Tile(int r, int c) {
-	    this.setFocusPainted(false);
-	    this.setOpaque(true); // Ensure the background is painted
-		this.setBackground((r+c)%2==0 ? black : white);
-		this.setBorderPainted(false);
-		this.row = r;
-		this.col = c;
-
+	private void setupTile() {
+		this.setPreferredSize(new Dimension(30, 30));
+		this.setBackground(startColors[(row + col) % 2]);
+		// this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		this.setFocusPainted(false);
+		this.setFont(getFont().deriveFont(12.0f));
 	}
 
 	public int getRow() {
@@ -37,26 +41,34 @@ public class Tile extends JButton{
 		return col;
 	}
 
-	public void setPiece(Piece piece) {
-		if(piece==null) {
-			this.piece = null;
-			this.setIcon(null);
-			return;
-		}
-		this.piece = piece;
-		this.setIcon(piece.getIcon());
-		piece.setLocation(row, col);
+	public boolean isRevealed() {
+		return revealed;
 	}
 	
-	
-	public Piece getPiece() {
-		return piece;
+	public void setRevealed(boolean revealed) {
+		this.revealed = revealed;
+		if (revealed) {
+			setEnabled(false);
+		}
 	}
 	public boolean isFlagged() {
-		if(piece instanceof Flag) {
-			return true;
-		}
-		return false;
+		return flagged;
+	}
+	public void setFlagged(boolean flagged){
+		this.flagged = flagged;
 	}
 	
+	public void toggleFlag() {
+		this.flagged = !this.flagged;
+	}
+
+	public void reset() {
+		this.revealed = false;
+		this.flagged = false;
+		this.setText("");
+		this.setBackground(startColors[(row + col) % 2]);
+		this.setEnabled(true);
+		// this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+	}
+
 }

@@ -21,31 +21,37 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.Timer;
+import javax.swing.SwingConstants;
 
-public class Board extends JPanel implements MouseListener, ActionListener{
+public class Board extends JPanel implements MouseListener{
 	
-	private boolean firstClick = false;
-	private Tile firstClickPiece = null;
-	private MinesweeperLogic mineLogic = new MinesweeperLogic();
-	
-	JFrame frame;
+	private MinesweeperLogic mineLogic;
+	private Tile[][] board;
+	private JFrame frame;
+	private Timer gameTimer;
+	private int timeElapsed = 0;
+	private boolean gameStarted = false;
+	private boolean gameOver = false;
 	
 	//size of the frame
-	private int width 	= 800;
-	private int height 	= 800;
+	private int rows = 14;
+	private int cols = 18;
+	private int mineCount = 40;
+	private int width 	= cols*50;
+	private int height 	= rows*50 + 50; //menu bar
 
-	/* Initialize the 8x8 board with pieces
-	 * The top 2 rows should have the black pieces
-	 * The bottom 2 rows should have the white pieces
-	 * 
-	 * Please see https://en.wikipedia.org/wiki/Chess
-	 * for the starting board positions and the rules of the game
-	 * 
-	 */
+	private Color[] startColors = {
+		new Color(11196241), new Color(10670409)
+	};
+	private Color[] endColors = {
+		new Color(15057567), new Color(14137497)
+	};
+
 	public Board() {
-		frame = new JFrame("Chess");
+		frame = new JFrame("Minesweeper");
+		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
 		setup();
-		
 	}
 
 	public void setup() {
@@ -54,156 +60,184 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 		frame.setSize(width, height);
 		setupBoard();
 		addMenus();
+
+		gameTimer = new Timer(1000, e -> {
+			if (gameStarted && !gameOver) {
+				timeElapsed++;
+				updateTitle();
+			}
+		});
 		
 		//add action for x button for a JFrame
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setUndecorated(true);
 		frame.setResizable(false);		
-		frame.getContentPane().setCursor(new Cursor(Cursor.HAND_CURSOR)); 
-		
-		//show the frame
+		frame.getContentPane().setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); 
+		updateTitle();
 		frame.setVisible(true);	
 		
 	}
 	
 	public void setupBoard() {
-		JPanel jp = new JPanel();
+		frame.getContentPane().removeAll();
 
-		GridLayout g = new GridLayout(8,8);
-		jp.setLayout(g);	
+		JPanel gamePanel = new JPanel();
+		GridLayout gridLayout = new GridLayout(rows, cols);	
+		gamePanel.setLayout(gridLayout);
+		gamePanel.setBackground(Color.GRAY);
 
+		board = mineLogic.getBoard();
 
-		Tile[][] board = chessLogic.getBoard();
-		for(int i =0; i < board.length;i++) {
-			for(int j = 0; j < board[0].length;j++) {
-				jp.add(board[i][j]);
+		for (int i = 0; i < rows; i++){
+			for (int j = 0; j < cols; j++){
 				board[i][j].addMouseListener(this);
+				board[i][j].setFont(getFont().deriveFont(12.0f));
+				board[i][j].setHorizontalAlignment(SwingConstants.CENTER);
+				gamePanel.add(board[i][j]);
 			}
 		}
 		
-		frame.add(jp);
+		frame.add(gamePanel);
+		frame.revalidate();
+		frame.repaint();
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+		if (gameOver) return;
+		// showAllMines(); //for testing
+		// mineLogic.testMineLocations(); //for testing
  		
-	}
+		Tile clickedTile = (Tile) e.getComponent();
+		int row = clickedTile.getRow();
+		int col = clickedTile.getCol();
 
-	
-	@Override
-	public void mousePressed(MouseEvent e) {
-		firstClick = !firstClick;
-
-
-		if (firstClick) {
-			//empty tile
-			firstClickPiece = (Tile) e.getComponent();
-			if(firstClickPiece.getPiece() == null) return;
-			
-			System.out.println(firstClickPiece.getPiece().getClass());
-			firstClickPiece.setBorder(BorderFactory.createLineBorder(Color.green,2));
-			
-			firstClickPiece.setBorderPainted(true);
-			Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-					((ImageIcon) ((Tile) e.getComponent()).getIcon()).getImage(), new Point(0, 0), "blank cursor");
-			frame.getContentPane().setCursor(blankCursor);
-			
-			boolean[][] validMoves = firstClickPiece.getPiece().moves();
-			highlightAllMoves(validMoves);
-			
-		} else {
- 			Tile curr = (Tile) e.getComponent(); 			
-			if(firstClickPiece.getPiece()!=null && firstClickPiece.getPiece().validMove(firstClickPiece, curr)){
-				System.out.println("Placing");
-				swap(firstClickPiece, curr, firstClickPiece.getPiece().capture(curr));
-			}
-			firstClickPiece.setBorderPainted(false);
-			frame.getContentPane().setCursor(new Cursor(Cursor.HAND_CURSOR));
-			resetHighlights();
- 		}
-		
- 		 
-		
-	}	
-	
-	public void highlightAllMoves(boolean[][] moves) {
-		System.out.println("highlight possible moves");
-		
-		if(moves == null){
-			System.out.println("moves was null for the piece");
-			return;
+		if(!gameStarted) {
+			mineLogic.ensureSafety(row, col);
+			gameStarted = true;
+			gameTimer.start();
 		}
 
-		Tile[][] board = chessLogic.getBoard();
-		for(int r = 0; r < moves.length; r++) {
-			for(int c = 0; c < moves[r].length; c++) {
-				if(moves[r][c]){
-					board[r][c].setBorder(BorderFactory.createLineBorder(Color.green,2));
-					board[r][c].setBorderPainted(true);
+		if(e.getButton() == MouseEvent.BUTTON1) {
+			if (!clickedTile.isFlagged()) {
+				revealTile(row, col);
+			}
+		} else if(e.getButton() == MouseEvent.BUTTON3 && gameStarted) {
+			// System.out.println("Right clicked" + row + ", " + col);
+			if(!clickedTile.isRevealed()){
+				toggleFlag(clickedTile);
+			}
+		}
+		checkWinCondition();
+	}
+
+	private void revealTile(int row, int col) {
+		// System.out.println("asdfasdf");
+		if(mineLogic.revealTile(row, col)){
+			gameOver = true;
+			gameTimer.stop();
+			showAllMines();
+			board[row][col].setBackground(Color.RED);
+			JOptionPane.showMessageDialog(frame, "Game Over! You hit a mine.");
+		} else {
+			updateTileDisplay(row, col);
+			if(mineLogic.getAdjacentMineCount(row, col) == 0){
+				revealAdjacentTiles(row, col);
+			}
+		}
+	}
+
+	private void revealAdjacentTiles(int row, int col) {
+		for(int i = -1; i <= 1; i++){
+			for(int j = -1; j <= 1; j++){
+				if(i == 0 && j == 0) continue;
+				int newRow = row + i;
+				int newCol = col + j;
+				if(mineLogic.isValidPosition(newRow, newCol) && !board[newRow][newCol].isRevealed() && !board[newRow][newCol].isFlagged()){
+					revealTile(newRow, newCol);
 				}
 			}
 		}
 	}
-	
-	public void resetHighlights() {
-		System.out.println("reset highlights for possible moves");
-		Tile[][] board = chessLogic.getBoard();
-		for(int r = 0; r < board.length; r++) {
-			for(int c = 0; c < board[r].length; c++) {
-				board[r][c].setBorderPainted(false);
+
+	private void toggleFlag(Tile tile) {
+		// System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
+		if(!tile.isFlagged()){
+			tile.setText("🚩");
+			tile.setFlagged(true);
+		} else {
+			tile.setText("");
+			tile.setFlagged(false);
+		}
+	}
+
+	private void updateTileDisplay(int row, int col) {
+		Tile tile = board[row][col];
+		tile.setRevealed(true);
+		int adjacentMines = mineLogic.getAdjacentMineCount(row, col);
+
+		if(adjacentMines > 0){
+			tile.setText(String.valueOf(adjacentMines));
+			tile.setForeground(getColorForNumber(adjacentMines));
+		}
+		tile.setBackground(endColors[(row + col) % 2]);
+		// tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+	}
+	private Color getColorForNumber(int number) {
+		switch(number){
+			case 1: return Color.BLUE;
+			case 2: return Color.GREEN;
+			case 3: return Color.RED;
+			case 4: return new Color(128, 0, 128);
+			case 5: return new Color(128, 0, 0);
+			case 6: return new Color(0, 128, 128);
+			case 7: return new Color(0, 0, 128);
+			case 8: return new Color(0, 0, 0);
+			default: return Color.BLACK;
+		}
+	}
+	private void showAllMines() {
+		for(int i = 0; i < board.length; i++){
+			for(int j = 0; j < board[i].length; j++){
+				if(mineLogic.isMine(i, j)){
+					board[i][j].setText("💣");
+					board[i][j].setBackground(Color.RED);
+				}
 			}
 		}
 	}
-	
-    /* swap objects a and b in board. Be sure to swap icons as well an update locations */
-    public void swap(Tile a, Tile b, boolean capture) {
 
-        Piece temp = a.getPiece();
-        temp.addMove();
+	private void checkWinCondition() {
+		if(!gameOver && mineLogic.isGameWon()){
+			gameOver = true;
+			gameTimer.stop();
 
-        if (!capture) {
-            a.setPiece(b.getPiece()); 
-        }else {
-            a.setPiece(null);
-        }
+			for(int i = 0; i < board.length; i++){
+				for(int j = 0; j < board[i].length; j++){
+					if(mineLogic.isMine(i, j) && !board[i][j].isFlagged()){
+						toggleFlag(board[i][j]);
+					}
+				}
+			}
 
-        b.setPiece(temp);
-
-    }
-	
-	public void reset() {
-		 frame.dispose(); // Close the current JFrame
-		 new Board();
-	}
-	
-	public void paint(Graphics g) {
-		System.out.println("paint");
+			JOptionPane.showMessageDialog(frame, "Congratulations! You won the game.");
+		}
 	}
 
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+	private void updateTitle() {
+		int flagsRemaining = mineCount - mineLogic.getFlagCount();
+		frame.setTitle("Minesweeper - Time: " + timeElapsed + "s | Flags Remaining: " + flagsRemaining);
 	}
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	private void reset() {
+		gameOver = false;
+		gameStarted = false;
+		timeElapsed = 0;
+		gameTimer.stop();
 
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
+		setupBoard();
+		updateTitle();
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		repaint();
- 	}
 
 	
 	public void addMenus() {
@@ -282,10 +316,26 @@ public class Board extends JPanel implements MouseListener, ActionListener{
  		menu.add(menuItem);
 		frame.setJMenuBar(menuBar);
 	}
-	
-	public static void main(String[] args) {
-		// Create an instance of the board
-		new Board();
 
+	@Override
+    public void mousePressed(MouseEvent e) {
+	
 	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+       
+    }
 }
