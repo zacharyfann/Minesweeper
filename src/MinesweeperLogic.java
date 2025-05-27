@@ -62,7 +62,7 @@ public class MinesweeperLogic {
 
 		board[row][col].setRevealed(true);
 		revealedTiles++;
-		System.out.println(isMine(row, col));
+		// System.out.println(isMine(row, col));
 		return isMine(row, col);
 	}
 

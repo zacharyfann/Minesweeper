@@ -97,7 +97,7 @@ public class Board extends JPanel implements MouseListener{
 	public void mouseClicked(MouseEvent e) {
 		if (gameOver) return;
 		// showAllMines(); //for testing
-		mineLogic.testMineLocations();
+		// mineLogic.testMineLocations(); //for testing
  		
 		Tile clickedTile = (Tile) e.getComponent();
 		int row = clickedTile.getRow();
@@ -111,20 +111,19 @@ public class Board extends JPanel implements MouseListener{
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
 			if (!clickedTile.isFlagged()) {
-				revealTile(row, col); //could be reveal time idk
+				revealTile(row, col);
 			}
 		} else if(e.getButton() == MouseEvent.BUTTON3) {
+			// System.out.println("Right clicked" + row + ", " + col);
 			if(!clickedTile.isRevealed()){
 				toggleFlag(clickedTile);
 			}
 		}
-
-		updateTileDisplay(row, col);
 		checkWinCondition();
 	}
 
 	private void revealTile(int row, int col) {
-		System.out.println("asdfasdf");
+		// System.out.println("asdfasdf");
 		if(mineLogic.revealTile(row, col)){
 			gameOver = true;
 			gameTimer.stop();
@@ -153,12 +152,15 @@ public class Board extends JPanel implements MouseListener{
 	}
 
 	private void toggleFlag(Tile tile) {
-		if(tile.isFlagged()){
+		System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
+		if(!tile.isFlagged()){
 			tile.setText("🚩");
-			tile.setBackground(Color.YELLOW);;
+			tile.setBackground(Color.YELLOW);
+			tile.setFlagged(true);
 		} else {
 			tile.setText("");
 			tile.setBackground(new Color(192, 192, 192));
+			tile.setFlagged(false);
 		}
 	}
 
