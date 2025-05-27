@@ -40,6 +40,13 @@ public class Board extends JPanel implements MouseListener{
 	private int width 	= 800;
 	private int height 	= 800;
 
+	private Color[] startColors = {
+		new Color(11196241), new Color(10670409)
+	};
+	private Color[] endColors = {
+		new Color(15057567), new Color(14137497)
+	};
+
 	public Board() {
 		frame = new JFrame("Minesweeper");
 		mineLogic = new MinesweeperLogic(boardSize, mineCount);
@@ -104,9 +111,9 @@ public class Board extends JPanel implements MouseListener{
 		int col = clickedTile.getCol();
 
 		if(!gameStarted) {
+			mineLogic.ensureSafety(row, col);
 			gameStarted = true;
 			gameTimer.start();
-			mineLogic.ensureSafety(row, col);
 		}
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
@@ -155,11 +162,9 @@ public class Board extends JPanel implements MouseListener{
 		// System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
 		if(!tile.isFlagged()){
 			tile.setText("🚩");
-			tile.setBackground(Color.YELLOW);
 			tile.setFlagged(true);
 		} else {
 			tile.setText("");
-			tile.setBackground(new Color(192, 192, 192));
 			tile.setFlagged(false);
 		}
 	}
@@ -173,8 +178,8 @@ public class Board extends JPanel implements MouseListener{
 			tile.setText(String.valueOf(adjacentMines));
 			tile.setForeground(getColorForNumber(adjacentMines));
 		}
-		tile.setBackground(Color.WHITE);
-		tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		tile.setBackground(endColors[(row + col) % 2]);
+		// tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 	private Color getColorForNumber(int number) {
 		switch(number){

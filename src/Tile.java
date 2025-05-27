@@ -8,6 +8,13 @@ public class Tile extends JButton{
 	private int col;
 	private boolean revealed;
 	private boolean flagged;
+
+	private Color[] startColors = {
+		new Color(11196241), new Color(7574834)
+	};
+	private Color[] endColors = {
+		new Color(15057567), new Color(14137497)
+	};
 	
 	public Tile(int row, int col) {
 	    this.row = row;
@@ -20,8 +27,8 @@ public class Tile extends JButton{
 
 	private void setupTile() {
 		this.setPreferredSize(new Dimension(30, 30));
-		this.setBackground(Color.LIGHT_GRAY);
-		this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		this.setBackground(startColors[(row + col) % 2]);
+		// this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 		this.setFocusPainted(false);
 		this.setFont(getFont().deriveFont(12.0f));
 	}
@@ -59,9 +66,9 @@ public class Tile extends JButton{
 		this.revealed = false;
 		this.flagged = false;
 		this.setText("");
-		this.setBackground(Color.LIGHT_GRAY);
+		this.setBackground(startColors[(row + col) % 2]);
 		this.setEnabled(true);
-		this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		// this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 	}
 
 }
