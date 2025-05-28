@@ -21,26 +21,36 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.Timer;
+import javax.swing.SwingConstants;
 
-public class Board extends JPanel implements MouseListener, ActionListener{
+public class Board extends JPanel implements MouseListener{
 	
-	private MinesweeperLogic mineLogic = new MinesweeperLogic();
+	private MinesweeperLogic mineLogic;
 	private Tile[][] board;
 	private JFrame frame;
-	private Timer timer;
+	private Timer gameTimer;
 	private int timeElapsed = 0;
 	private boolean gameStarted = false;
 	private boolean gameOver = false;
 	
 	//size of the frame
-	private int boardSize = 18;
+	private int rows = 14;
+	private int cols = 18;
 	private int mineCount = 40;
-	private int width 	= 800;
-	private int height 	= 800;
+	private int width 	= cols*50;
+	private int height 	= rows*50 + 50; //menu bar
+
+	private Color[] startColors = {
+		new Color(11196241), new Color(10670409)
+	};
+	private Color[] endColors = {
+		new Color(15057567), new Color(14137497)
+	};
 
 	public Board() {
 		frame = new JFrame("Minesweeper");
-		mineLogic = new MinesweeperLogic(boardSize, mineCount);
+		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
 		setup();
 	}
 
@@ -70,17 +80,19 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	public void setupBoard() {
 		frame.getContentPane().removeAll();
 
-		JPanel gamPanel = new JPanel();
-		GridLayout gridLayout = new GridLayout(boardSize, boardSize);	
-		gamPanel.setLayout(gridLayout);
-		gamPanel.setBackground(Color.GRAY);
+		JPanel gamePanel = new JPanel();
+		GridLayout gridLayout = new GridLayout(rows, cols);	
+		gamePanel.setLayout(gridLayout);
+		gamePanel.setBackground(Color.GRAY);
 
-		for (int i = 0; i < board.length; i++){
-			for (int j = 0; j < board[i].length; j++){
+		board = mineLogic.getBoard();
+
+		for (int i = 0; i < rows; i++){
+			for (int j = 0; j < cols; j++){
 				board[i][j].addMouseListener(this);
-				board[i][j].setFont(new Font("Arial", Font.PLAIN, 20));
+				board[i][j].setFont(getFont().deriveFont(12.0f));
 				board[i][j].setHorizontalAlignment(SwingConstants.CENTER);
-				gamPanel.add(board[i][j]);
+				gamePanel.add(board[i][j]);
 			}
 		}
 		
@@ -92,32 +104,34 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (gameOver) return;
+		// showAllMines(); //for testing
+		// mineLogic.testMineLocations(); //for testing
  		
 		Tile clickedTile = (Tile) e.getComponent();
 		int row = clickedTile.getRow();
 		int col = clickedTile.getCol();
 
 		if(!gameStarted) {
+			mineLogic.ensureSafety(row, col);
 			gameStarted = true;
 			gameTimer.start();
-			mineLogic.ensureSafety(row, col);
 		}
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
 			if (!clickedTile.isFlagged()) {
-				revealTime(row, col);
+				revealTile(row, col);
 			}
-		} else if(e.getButton() == MouseEvent.BUTTON3) {
+		} else if(e.getButton() == MouseEvent.BUTTON3 && gameStarted) {
+			// System.out.println("Right clicked" + row + ", " + col);
 			if(!clickedTile.isRevealed()){
 				toggleFlag(clickedTile);
 			}
 		}
-
-		updateTile();
 		checkWinCondition();
 	}
 
 	private void revealTile(int row, int col) {
+		// System.out.println("asdfasdf");
 		if(mineLogic.revealTile(row, col)){
 			gameOver = true;
 			gameTimer.stop();
@@ -132,13 +146,13 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 		}
 	}
 
-	private revealAdjacentTiles(int row, int col) {
+	private void revealAdjacentTiles(int row, int col) {
 		for(int i = -1; i <= 1; i++){
 			for(int j = -1; j <= 1; j++){
 				if(i == 0 && j == 0) continue;
 				int newRow = row + i;
 				int newCol = col + j;
-				if(mineLogic.isValidTile(newRow, newCol) && !board[newRow][newCol].isRevealed() && !board[newRow][newCol].isFlagged()){
+				if(mineLogic.isValidPosition(newRow, newCol) && !board[newRow][newCol].isRevealed() && !board[newRow][newCol].isFlagged()){
 					revealTile(newRow, newCol);
 				}
 			}
@@ -146,12 +160,13 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	}
 
 	private void toggleFlag(Tile tile) {
-		if(tile.isFlagged()){
+		// System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
+		if(!tile.isFlagged()){
 			tile.setText("🚩");
-			tile.setBackground(Color.YELLOW);;
+			tile.setFlagged(true);
 		} else {
 			tile.setText("");
-			tile.setBackground(new Color(192, 192, 192));
+			tile.setFlagged(false);
 		}
 	}
 
@@ -164,8 +179,8 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 			tile.setText(String.valueOf(adjacentMines));
 			tile.setForeground(getColorForNumber(adjacentMines));
 		}
-		tile.setBackground(Color.WHITE);
-		tile.setBorder(BorderFactory.createLineBorder());
+		tile.setBackground(endColors[(row + col) % 2]);
+		// tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 	private Color getColorForNumber(int number) {
 		switch(number){
@@ -192,7 +207,7 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 	}
 
 	private void checkWinCondition() {
-		if(!ggameover && mineLogic.isGameWon()){
+		if(!gameOver && mineLogic.isGameWon()){
 			gameOver = true;
 			gameTimer.stop();
 
@@ -219,7 +234,7 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 		timeElapsed = 0;
 		gameTimer.stop();
 
-		mineLogic = new MinesweeperLogic(boardSize, mineCount);
+		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
 		setupBoard();
 		updateTitle();
 	}
@@ -302,4 +317,25 @@ public class Board extends JPanel implements MouseListener, ActionListener{
 		frame.setJMenuBar(menuBar);
 	}
 
+	@Override
+    public void mousePressed(MouseEvent e) {
+	
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+       
+    }
 }
