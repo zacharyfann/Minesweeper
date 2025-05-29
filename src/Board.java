@@ -122,9 +122,13 @@ public class Board extends JPanel implements MouseListener{
 				revealTile(row, col);
 			}
 		} else if(e.getButton() == MouseEvent.BUTTON3 && gameStarted) {
-			// System.out.println("Right clicked" + row + ", " + col);
 			if(!clickedTile.isRevealed()){
 				toggleFlag(clickedTile);
+			}
+		} else if(e.getButton() == MouseEvent.BUTTON2) {
+			// System.out.println("Middle clicked" + row + ", " + col);
+			if(clickedTile.isRevealed() && mineLogic.getAdjacentFlagCount(row, col) == mineLogic.getAdjacentMineCount(row, col)) {
+				revealAdjacentTiles(row, col);
 			}
 		}
 		checkWinCondition();
@@ -164,9 +168,11 @@ public class Board extends JPanel implements MouseListener{
 		if(!tile.isFlagged()){
 			tile.setText("🚩");
 			tile.setFlagged(true);
+			mineLogic.setFlagged(tile.getRow(), tile.getCol(), true);
 		} else {
 			tile.setText("");
 			tile.setFlagged(false);
+			mineLogic.setFlagged(tile.getRow(), tile.getCol(), false);
 		}
 		updateTitle();
 	}
@@ -178,11 +184,13 @@ public class Board extends JPanel implements MouseListener{
 
 		if(adjacentMines > 0){
 			tile.setText(String.valueOf(adjacentMines));
+			tile.setEnabled(true);
 			tile.setForeground(getColorForNumber(adjacentMines));
 		}
 		tile.setBackground(endColors[(row + col) % 2]);
 		// tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
+
 	private Color getColorForNumber(int number) {
 		switch(number){
 			case 1: return Color.BLUE;

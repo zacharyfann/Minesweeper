@@ -68,6 +68,28 @@ public class MinesweeperLogic {
 		return isMine(row, col);
 	}
 
+	public int getAdjacentFlagCount(int row, int col) {
+		if (!isValidPosition(row, col)) {
+			return 0;
+		}
+
+		int count = 0;
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (i == 0 && j == 0) continue;
+				int newRow = row + i;
+				int newCol = col + j;
+
+
+				if (isValidPosition(newRow, newCol) && board[newRow][newCol].isFlagged()) {
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
 	public int getAdjacentMineCount(int row, int col) {
 		if (!isValidPosition(row, col)) {
 			return 0;
@@ -88,6 +110,17 @@ public class MinesweeperLogic {
 		}
 
 		return count;
+	}
+
+	public void setFlagged(int row, int col, boolean flagged) {
+		if (isValidPosition(row, col)) {
+			board[row][col].setFlagged(flagged);
+			if (flagged) {
+				revealedFlags++;
+			} else {
+				revealedFlags--;
+			}
+		}
 	}
 
 	public boolean isValidPosition(int row, int col) {
