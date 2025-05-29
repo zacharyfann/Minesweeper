@@ -1,4 +1,3 @@
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -48,9 +47,27 @@ public class Board extends JPanel implements MouseListener{
 		new Color(15057567), new Color(14137497)
 	};
 
+	private ImageIcon flagIcon;
+
 	public Board() {
 		frame = new JFrame("Minesweeper");
 		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
+		// Load flag icon
+		java.net.URL flagURL = getClass().getResource("/images/flag.png");
+		if (flagURL != null) {
+			flagIcon = new ImageIcon(new ImageIcon(flagURL).getImage().getScaledInstance(45, 45, java.awt.Image.SCALE_SMOOTH));
+		} else {
+			System.err.println("Couldn't find file: /images/flag.png");
+			String absPath = System.getProperty("user.dir") + "\\bin\\images\\flag.png";
+			System.err.println("Trying absolute path: " + absPath);
+			java.io.File file = new java.io.File(absPath);
+			if (file.exists()) {
+				flagIcon = new ImageIcon(new ImageIcon(absPath).getImage().getScaledInstance(45, 45, java.awt.Image.SCALE_SMOOTH));
+				System.err.println("Loaded flag icon from filesystem: " + absPath);
+			} else {
+				System.err.println("Still couldn't find flag.png at: " + absPath);
+			}
+		}
 		setup();
 	}
 
@@ -166,10 +183,12 @@ public class Board extends JPanel implements MouseListener{
 	private void toggleFlag(Tile tile) {
 		// System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
 		if(!tile.isFlagged()){
-			tile.setText("🚩");
+			tile.setIcon(flagIcon); // Set flag image
+			tile.setText("");
 			tile.setFlagged(true);
 			mineLogic.setFlagged(tile.getRow(), tile.getCol(), true);
 		} else {
+			tile.setIcon(null); // Remove flag image
 			tile.setText("");
 			tile.setFlagged(false);
 			mineLogic.setFlagged(tile.getRow(), tile.getCol(), false);
@@ -186,6 +205,7 @@ public class Board extends JPanel implements MouseListener{
 			tile.setText(String.valueOf(adjacentMines));
 			tile.setEnabled(true);
 			tile.setForeground(getColorForNumber(adjacentMines));
+			tile.setFont(tile.getFont().deriveFont(27.0f));
 		}
 		tile.setBackground(endColors[(row + col) % 2]);
 		// tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
