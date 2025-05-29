@@ -168,6 +168,7 @@ public class Board extends JPanel implements MouseListener{
 			tile.setText("");
 			tile.setFlagged(false);
 		}
+		updateTitle();
 	}
 
 	private void updateTileDisplay(int row, int col) {
