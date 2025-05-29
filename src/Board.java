@@ -184,6 +184,7 @@ public class Board extends JPanel implements MouseListener{
 
 		if(adjacentMines > 0){
 			tile.setText(String.valueOf(adjacentMines));
+			tile.setEnabled(true);
 			tile.setForeground(getColorForNumber(adjacentMines));
 		}
 		tile.setBackground(endColors[(row + col) % 2]);
