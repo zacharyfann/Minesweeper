@@ -11,8 +11,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -52,42 +54,46 @@ public class Board extends JPanel implements MouseListener{
 	public Board() {
 		frame = new JFrame("Minesweeper");
 		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
-		// Load flag icon
-		java.net.URL flagURL = getClass().getResource("/images/flag.png");
-		if (flagURL != null) {
-			flagIcon = new ImageIcon(new ImageIcon(flagURL).getImage().getScaledInstance(45, 45, java.awt.Image.SCALE_SMOOTH));
-		} else {
-			System.err.println("Couldn't find file: /images/flag.png");
-			String absPath = System.getProperty("user.dir") + "\\bin\\images\\flag.png";
-			System.err.println("Trying absolute path: " + absPath);
-			java.io.File file = new java.io.File(absPath);
-			if (file.exists()) {
-				flagIcon = new ImageIcon(new ImageIcon(absPath).getImage().getScaledInstance(45, 45, java.awt.Image.SCALE_SMOOTH));
-				System.err.println("Loaded flag icon from filesystem: " + absPath);
-			} else {
-				System.err.println("Still couldn't find flag.png at: " + absPath);
-			}
-		}
-		setup();
+		showTitleScreen();
+	}
+
+	private void showTitleScreen() {
+		frame.getContentPane().removeAll();
+		JPanel titlePanel = new JPanel();
+		titlePanel.setLayout(new java.awt.BorderLayout());
+		
+		String absPath = System.getProperty("user.dir") + "\\bin\\images\\title-screen.png";
+		ImageIcon titleIcon = new ImageIcon(new ImageIcon(absPath).getImage().getScaledInstance(900, 700, java.awt.Image.SCALE_SMOOTH));
+		JLabel imageLabel = new JLabel(titleIcon);
+		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		titlePanel.add(imageLabel, java.awt.BorderLayout.CENTER);
+		JButton startButton = new JButton("Start");
+		startButton.setFont(new java.awt.Font("Times New Roman", java.awt.Font.BOLD, 32));
+		startButton.setFocusPainted(false);
+		startButton.addActionListener(e -> {
+			setup();
+		});
+		titlePanel.add(startButton,java.awt.BorderLayout.SOUTH);
+		frame.setContentPane(titlePanel);
+		frame.setSize(width, height);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
+		frame.setVisible(true);
 	}
 
 	public void setup() {
-		
-		
+		frame.getContentPane().removeAll();
 		frame.setSize(width, height);
 		setupBoard();
 		addMenus();
-
 		gameTimer = new Timer(1000, e -> {
 			if (gameStarted && !gameOver) {
 				timeElapsed++;
 				updateTitle();
 			}
 		});
-		
-		//add action for x button for a JFrame
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);		
+		frame.setResizable(false);
 		frame.getContentPane().setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); 
 		updateTitle();
 		frame.setVisible(true);	
@@ -117,6 +123,7 @@ public class Board extends JPanel implements MouseListener{
 		frame.revalidate();
 		frame.repaint();
 	}
+	
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -183,12 +190,12 @@ public class Board extends JPanel implements MouseListener{
 	private void toggleFlag(Tile tile) {
 		// System.out.println(tile.getRow() + ", " + tile.getCol() + " flagged: " + tile.isFlagged());
 		if(!tile.isFlagged()){
-			tile.setIcon(flagIcon); // Set flag image
+			tile.setIcon(flagIcon); 
 			tile.setText("");
 			tile.setFlagged(true);
 			mineLogic.setFlagged(tile.getRow(), tile.getCol(), true);
 		} else {
-			tile.setIcon(null); // Remove flag image
+			tile.setIcon(null); 
 			tile.setText("");
 			tile.setFlagged(false);
 			mineLogic.setFlagged(tile.getRow(), tile.getCol(), false);
