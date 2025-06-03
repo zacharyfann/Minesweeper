@@ -55,6 +55,8 @@ public class Board extends JPanel implements MouseListener{
 		frame = new JFrame("Minesweeper");
 		mineLogic = new MinesweeperLogic(rows, cols, mineCount);
 		showTitleScreen();
+		String absPath = System.getProperty("user.dir") + "\\bin\\images\\flag.png";
+		flagIcon = new ImageIcon(new ImageIcon(absPath).getImage().getScaledInstance(45, 45, java.awt.Image.SCALE_SMOOTH));		
 	}
 
 	private void showTitleScreen() {
