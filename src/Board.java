@@ -24,6 +24,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import javax.swing.SwingConstants;
+import java.util.Random;
 
 public class Board extends JPanel implements MouseListener{
 	
@@ -34,7 +35,7 @@ public class Board extends JPanel implements MouseListener{
 	private int timeElapsed = 0;
 	private boolean gameStarted = false;
 	private boolean gameOver = false;
-	
+	private int bestTime = 0;
 	//size of the frame
 	private int rows = 14;
 	private int cols = 18;
@@ -258,8 +259,15 @@ public class Board extends JPanel implements MouseListener{
 			}
 
 			JOptionPane.showMessageDialog(frame, "Congratulations! You won the game.");
+			if (timeElapsed < bestTime || bestTime == 0) {
+				bestTime = timeElapsed;
+				JOptionPane.showMessageDialog(frame, "New Best Time: " + bestTime + " seconds!");
+			} else {
+				JOptionPane.showMessageDialog(frame, "Your time: " + timeElapsed + " seconds. Best time: " + bestTime + " seconds.");
+			}
 		}
 	}
+	
 
 	private void updateTitle() {
 		int flagsRemaining = mineCount - mineLogic.getFlagCount();
